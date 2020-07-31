@@ -43,7 +43,7 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.refreshActiveUser();
-      this.$router.push('/');
+      this.$router.push('/#');
     },
   },
 };
