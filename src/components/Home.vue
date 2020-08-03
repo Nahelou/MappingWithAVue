@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    text-align: center
   }
   .hero .lead {
     font-weight: 200;
