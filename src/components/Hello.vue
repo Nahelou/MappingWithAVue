@@ -1,8 +1,7 @@
 <template>
   <div class="hero">
     <div>
-      <h1 class="display-3">Territoire 360</h1>
-      <p class="lead">Appréhendez l'espace par la data</p>
+      <h1 class="display-3">Mapping With A Vue</h1>
     </div>
   </div>
 </template>

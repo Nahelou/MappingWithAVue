@@ -1,22 +1,11 @@
 <template>
   <div style="height: 100vh; padding-top:auto;">
-      <div class="col-md-3">
-      <div
-        class="form-check"
-        v-for="layer in layers"
-        :key="layer.id"
+      <label for="checkboxTooltip">Activer la popup</label>
+      <input
+        id="checkboxTooltip"
+        v-model="enableTooltip"
+        type="checkbox"
       >
-        <label class="form-check-label">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            v-model="layer.active"
-            @change="layerChanged(layer.id, layer.active)"
-          />
-          {{ layer.name }}
-        </label>
-      </div>
-    </div>
     <l-map
       style="height: 100%; width: 100%"
       :zoom="zoom"
@@ -27,8 +16,12 @@
       @update:bounds="boundsUpdated"
     >
       <l-tile-layer :url="url"></l-tile-layer>
-      <l-geo-json :geojson="layers[0].data" :options="options" :fillColor="fillColor"/>
-      <l-geo-json :geojson="layers[1].data" :options="options"/>
+			<l-geo-json v-for="(layer, index) in layers"
+          :key="index"
+          :geojson="layer.data"
+          :options="options" 
+          :options-style="getColor(layer)"
+          :name="layer.name"/>
     </l-map>
   </div>
 </template>
@@ -48,6 +41,7 @@ export default {
     return {
       map:null,
       url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      enableTooltip: true,
       zoom: 8,
       tileLayer: null,
       center: [47.713220, -2.819482],
@@ -77,10 +71,11 @@ export default {
       return {
         onEachFeature: this.onEachFeatureFunction
       };
-    this.initMap();
-    // this.initLayers();
     },
   onEachFeatureFunction() {
+      if (!this.enableTooltip) {
+        return () => {};
+      }
       return (feature, layer) => {
         layer.bindTooltip(
           "<div>Code : " +
@@ -95,13 +90,26 @@ export default {
   },
   async created () {
     this.layers.forEach(async (l) =>{
-    console.log(l)
     const response = await fetch(`https://rawgit.com/gregoiredavid/france-geojson/master/regions/${l.name}/communes-${l.name}.geojson`);
     let data = await response.json();
     l.data = data;
     });
   },
-      methods: {
+    methods: {
+    getColor(layer){
+      return layer.name == "normandie"
+        ?{
+            color:'white',
+            fillColor:"#ce7f84",
+            weight: 0.5,
+            fillOpacity: 0.7,
+            }
+        :{
+            color:'white',
+            fillColor:"#e4ce7f",
+            weight: 0.5,
+            fillOpacity: 0.7,
+            }},
     zoomUpdated (zoom) {
       this.zoom = zoom;
     },
@@ -109,7 +117,6 @@ export default {
       this.center = center;
     },
     boundsUpdated (bounds) {
-        console.log(this);
       this.bounds = bounds;
     },
     async layerChanged(layerId, active) {
